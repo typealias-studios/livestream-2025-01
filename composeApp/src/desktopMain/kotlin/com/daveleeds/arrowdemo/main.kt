@@ -6,8 +6,8 @@ import androidx.compose.ui.window.application
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
-        title = "livestream-2025-01",
+        title = "Wrestlers",
     ) {
-        App()
+        App(WrestlerViewModel())
     }
 }

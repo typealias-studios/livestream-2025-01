@@ -16,7 +16,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -28,10 +28,20 @@ kotlin {
             implementation(libs.arrow.fx.coroutines)
             implementation(libs.arrow.resilience)
             implementation(libs.arrow.optics)
+
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.serialization.json)
+            implementation(libs.ktor.content.negotiation)
+            implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+            implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+            implementation("io.coil-kt.coil3:coil-compose:3.0.4")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.compose.ui.desktop)
+            implementation(compose.material3)
         }
     }
 }
