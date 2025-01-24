@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -36,6 +37,7 @@ kotlin {
             implementation("io.coil-kt.coil3:coil-compose:3.0.4")
             implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
             implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
