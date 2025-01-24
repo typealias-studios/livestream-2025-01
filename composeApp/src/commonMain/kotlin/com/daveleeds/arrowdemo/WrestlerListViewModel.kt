@@ -10,7 +10,7 @@ data class WrestlerUiState(
     val loading: Boolean = false
 )
 
-class WrestlerViewModel(
+class WrestlerListViewModel(
     private val repository: WrestlerRepository = WrestlerRepository(),
     dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {

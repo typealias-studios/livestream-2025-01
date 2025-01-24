@@ -21,7 +21,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App(viewModel: WrestlerViewModel, darkTheme: Boolean = true) {
+fun App(viewModel: WrestlerListViewModel, darkTheme: Boolean = true) {
     val uiState by viewModel.uiState.collectAsState()
 
     MaterialTheme(colorScheme = if (darkTheme) darkScheme else lightScheme) {
@@ -31,7 +31,7 @@ fun App(viewModel: WrestlerViewModel, darkTheme: Boolean = true) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else {
                     Column {
-                        uiState.wrestlers.forEach { wrestler -> Wrestler(wrestler) }
+                        uiState.wrestlers.forEach { wrestler -> WrestlerRow(wrestler) }
                     }
                 }
                 Button(onClick = { viewModel.refresh() }, modifier = Modifier.padding(12.dp).align(Alignment.BottomEnd)) {
@@ -43,7 +43,7 @@ fun App(viewModel: WrestlerViewModel, darkTheme: Boolean = true) {
 }
 
 @Composable
-fun Wrestler(wrestler: Wrestler) {
+fun WrestlerRow(wrestler: Wrestler) {
     Row(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         AsyncImage(
             model = "$IMAGE_URL/${wrestler.id}.png",
