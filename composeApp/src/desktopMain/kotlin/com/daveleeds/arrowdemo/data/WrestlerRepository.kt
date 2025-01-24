@@ -1,8 +1,14 @@
-package com.daveleeds.arrowdemo
+package com.daveleeds.arrowdemo.data
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import com.daveleeds.arrowdemo.API_URL
+import com.daveleeds.arrowdemo.Wrestler
+import com.daveleeds.arrowdemo.WrestlerIds
+import com.daveleeds.arrowdemo.defaultClient
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.CoroutineDispatcher
@@ -22,10 +28,10 @@ class WrestlerRepository(
         client.get("$baseUrl/$id").body()
     }
 
-    suspend fun saveWrestler(wrestler: Wrestler) = withContext(dispatcher) {
+    suspend fun saveWrestler(wrestler: Wrestler): Wrestler = withContext(dispatcher) {
         client.put("$baseUrl/${wrestler.id}") {
             contentType(ContentType.Application.Json)
             setBody(wrestler)
-        }
+        }.body()
     }
 }

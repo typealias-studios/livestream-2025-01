@@ -3,6 +3,9 @@ package com.daveleeds.arrowdemo
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class WrestlerIds(val ids: List<Int>)
+
+@Serializable
 data class Wrestler(val id: Int, val name: String, val age: Int, val weight: Int, val hometown: Hometown)
 
 @Serializable

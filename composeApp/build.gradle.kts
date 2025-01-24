@@ -45,6 +45,9 @@ kotlin {
             implementation(libs.compose.ui.desktop)
             implementation(compose.material3)
         }
+        desktopMain.kotlin {
+            srcDir("build/generated/ksp/desktop/desktopMain/kotlin")
+        }
     }
 }
 

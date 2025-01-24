@@ -1,9 +1,10 @@
-package com.daveleeds.arrowdemo
+package com.daveleeds.arrowdemo.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.daveleeds.arrowdemo.WrestlerEditStatus.*
-import kotlinx.coroutines.async
+import com.daveleeds.arrowdemo.Wrestler
+import com.daveleeds.arrowdemo.data.WrestlerRepository
+import com.daveleeds.arrowdemo.viewmodel.WrestlerEditStatus.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -11,12 +12,11 @@ import kotlinx.coroutines.launch
 
 data class WrestlerEditUiState(
     val wrestler: Wrestler? = null,
-    val status: WrestlerEditStatus = FRESH
+    val exception: Throwable? = null,
+    val status: WrestlerEditStatus = START
 )
 
-enum class WrestlerEditStatus {
-    FRESH, LOADING, LOADED, SAVING, SAVED
-}
+enum class WrestlerEditStatus { START, LOADING, LOADED, SAVING, SAVED, ERROR }
 
 class WrestlerEditViewModel(
     private val repository: WrestlerRepository = WrestlerRepository()
@@ -24,19 +24,24 @@ class WrestlerEditViewModel(
     private val _uiState = MutableStateFlow(WrestlerEditUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun load(id: Int) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(status = LOADING) }
-            val wrestler = async { repository.fetchWrestler(id) }
-            _uiState.update { it.copy(status = LOADED, wrestler = wrestler.await()) }
+    fun load(id: Int) = viewModelScope.launch {
+        _uiState.update { it.copy(status = LOADING) }
+        try {
+            val wrestler = repository.fetchWrestler(id)
+            _uiState.update { it.copy(status = LOADED, wrestler = wrestler, exception = null) }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(status = ERROR, exception = e) }
         }
     }
 
-    fun save() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(status = SAVING) }
-            _uiState.value.wrestler?.let { repository.saveWrestler(it) }
-            _uiState.update { it.copy(status = SAVED) }
+    fun save() = viewModelScope.launch {
+        _uiState.update { it.copy(status = SAVING) }
+
+        try {
+            val wrestler = _uiState.value.wrestler?.let { repository.saveWrestler(it) }
+            _uiState.update { it.copy(status = SAVED, wrestler = wrestler, exception = null) }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(status = ERROR, exception = e) }
         }
     }
 
