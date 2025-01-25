@@ -1,12 +1,17 @@
 package com.daveleeds.arrowdemo
 
+import arrow.optics.optics
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class WrestlerIds(val ids: List<Int>)
 
 @Serializable
-data class Wrestler(val id: Int, val name: String, val age: Int, val weight: Int, val hometown: Hometown)
+@optics data class Wrestler(val id: Int, val name: String, val age: Int, val weight: Int, val hometown: Hometown) {
+    companion object
+}
 
 @Serializable
-data class Hometown(val city: String, val country: String)
+@optics data class Hometown(val city: String, val country: String) {
+    companion object
+}
