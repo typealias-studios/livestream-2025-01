@@ -2,6 +2,7 @@ package com.daveleeds.arrowdemo.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.fx.coroutines.parMap
 import com.daveleeds.arrowdemo.Wrestler
 import com.daveleeds.arrowdemo.data.WrestlerRepository
 import com.daveleeds.arrowdemo.viewmodel.WrestlerListStatus.*
@@ -33,8 +34,7 @@ class WrestlerListViewModel(
             try {
                 val wrestlers = repository
                     .fetchWrestlerIds()
-                    .map { id -> async { repository.fetchWrestler(id) } }
-                    .awaitAll()
+                    .parMap { id -> repository.fetchWrestler(id) }
 
                 _uiState.update { it.copy(status = LOADED, wrestlers = wrestlers, exception = null) }
             } catch (e: Exception) {
