@@ -2,6 +2,7 @@ package com.daveleeds.arrowdemo.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.core.Either.Companion.catch
 import arrow.fx.coroutines.parMap
 import com.daveleeds.arrowdemo.Wrestler
 import com.daveleeds.arrowdemo.data.WrestlerRepository
@@ -31,14 +32,17 @@ class WrestlerListViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(status = LOADING) }
 
-            try {
-                val wrestlers = repository
+            val result = catch {
+                repository
                     .fetchWrestlerIds()
                     .parMap { id -> repository.fetchWrestler(id) }
+            }
 
-                _uiState.update { it.copy(status = LOADED, wrestlers = wrestlers, exception = null) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(status = ERROR, exception = e) }
+            _uiState.update { state ->
+                result.fold(
+                    ifLeft = { state.copy(status = ERROR, exception = it) },
+                    ifRight = { state.copy(status = LOADED, wrestlers = it, exception = null) }
+                )
             }
         }
     }
