@@ -31,9 +31,8 @@ class WrestlerListViewModel(
             _uiState.update { it.copy(status = LOADING) }
 
             try {
-                val ids = repository.fetchWrestlerIds()
-
-                val wrestlers = ids
+                val wrestlers = repository
+                    .fetchWrestlerIds()
                     .map { id -> async { repository.fetchWrestler(id) } }
                     .awaitAll()
 
