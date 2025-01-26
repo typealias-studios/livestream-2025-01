@@ -29,6 +29,7 @@ kotlin {
             implementation(libs.arrow.fx.coroutines)
             implementation(libs.arrow.resilience)
             implementation(libs.arrow.optics)
+            implementation(libs.arrow.optics.compose)
 
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
