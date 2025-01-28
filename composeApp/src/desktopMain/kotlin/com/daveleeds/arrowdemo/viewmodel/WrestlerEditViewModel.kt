@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either.Companion.catch
 import arrow.optics.optics
+import arrow.optics.updateCopy
 import com.daveleeds.arrowdemo.Hometown
 import com.daveleeds.arrowdemo.Wrestler
 import com.daveleeds.arrowdemo.age
@@ -13,6 +14,7 @@ import com.daveleeds.arrowdemo.data.WrestlerRepository
 import com.daveleeds.arrowdemo.hometown
 import com.daveleeds.arrowdemo.name
 import com.daveleeds.arrowdemo.viewmodel.WrestlerEditStatus.*
+import com.daveleeds.arrowdemo.viewmodel.wrestler
 import com.daveleeds.arrowdemo.weight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,75 +40,66 @@ class WrestlerEditViewModel(
     val uiState = _uiState.asStateFlow()
 
     fun load(id: Int) = viewModelScope.launch {
-        _uiState.update { it.copy(status = LOADING) }
+        _uiState.updateCopy {
+            WrestlerEditUiState.status set LOADING
+        }
 
-        val result = catch { repository.fetchWrestler(id) }
-
-        _uiState.update { state ->
-            result.fold(
-                ifLeft = {
-                    state.copy(
-                        status = ERROR,
-                        exception = it
-                    )
-                },
-                ifRight = {
-                    state.copy(
-                        status = LOADED,
-                        wrestler = it,
-                        exception = null
-                    )
-                }
-            )
+        try {
+            val wrestler = repository.fetchWrestler(id)
+            _uiState.updateCopy {
+                WrestlerEditUiState.status set LOADED
+                WrestlerEditUiState.wrestler set wrestler
+                WrestlerEditUiState.exception set null
+            }
+        } catch (e: Exception) {
+            _uiState.updateCopy {
+                WrestlerEditUiState.status set ERROR
+                WrestlerEditUiState.exception set e
+            }
         }
     }
 
     fun save() = viewModelScope.launch {
-        _uiState.update { it.copy(status = SAVING) }
+        _uiState.updateCopy {
+            WrestlerEditUiState.status set SAVING
+        }
 
-        val result = catch {
-            _uiState
+        try {
+            val wrestler = _uiState
                 .value
                 .wrestler
                 .let { repository.saveWrestler(it) }
-        }
 
-        _uiState.update { state ->
-            result.fold(
-                ifLeft = {
-                    state.copy(
-                        status = ERROR,
-                        exception = it
-                    )
-                },
-                ifRight = {
-                    state.copy(
-                        status = SAVED,
-                        wrestler = it,
-                        exception = null
-                    )
-                }
-            )
+            _uiState.updateCopy {
+                WrestlerEditUiState.status set SAVED
+                WrestlerEditUiState.wrestler set wrestler
+                WrestlerEditUiState.exception set null
+            }
+        } catch (e: Exception) {
+            _uiState.updateCopy {
+                WrestlerEditUiState.status set ERROR
+                WrestlerEditUiState.exception set e
+            }
         }
     }
 
-    fun setName(name: String) = _uiState.update {
-        WrestlerEditUiState.wrestler.name.modify(it) { name }
+    fun setName(name: String) = _uiState.updateCopy {
+        WrestlerEditUiState.wrestler.name set name
     }
 
-    fun setAge(age: Int) = _uiState.update {
-        WrestlerEditUiState.wrestler.age.modify(it) { age }
+    fun setAge(age: Int) = _uiState.updateCopy {
+        WrestlerEditUiState.wrestler.age set age
     }
 
-    fun setWeight(weight: Int) = _uiState.update {
-        WrestlerEditUiState.wrestler.weight.modify(it) { weight }
+    fun setWeight(weight: Int) = _uiState.updateCopy {
+        WrestlerEditUiState.wrestler.weight set weight
     }
 
-    fun setCity(city: String) = _uiState.update {
-        WrestlerEditUiState.wrestler.hometown.city.modify(it) { city }
+    fun setCity(city: String) = _uiState.updateCopy {
+        WrestlerEditUiState.wrestler.hometown.city set city
     }
 
-    fun setCountry(country: String) = _uiState.update {
-        WrestlerEditUiState.wrestler.hometown.country.modify(it) { country }
+    fun setCountry(country: String) = _uiState.updateCopy {
+        WrestlerEditUiState.wrestler.hometown.country set country
     }
 }
