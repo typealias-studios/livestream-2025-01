@@ -2,6 +2,7 @@ package com.daveleeds.arrowdemo.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.core.Either.Companion.catch
 import com.daveleeds.arrowdemo.Wrestler
 import com.daveleeds.arrowdemo.data.WrestlerRepository
 import com.daveleeds.arrowdemo.viewmodel.WrestlerEditStatus.*
@@ -29,48 +30,53 @@ class WrestlerEditViewModel(
     fun load(id: Int) = viewModelScope.launch {
         _uiState.update { it.copy(status = LOADING) }
 
-        try {
-            val wrestler = repository.fetchWrestler(id)
-            _uiState.update {
-                it.copy(
-                    status = LOADED,
-                    wrestler = wrestler,
-                    exception = null
-                )
-            }
-        } catch (e: Exception) {
-            _uiState.update {
-                it.copy(
-                    status = ERROR,
-                    exception = e
-                )
-            }
+        val result = catch { repository.fetchWrestler(id) }
+
+        _uiState.update { state ->
+            result.fold(
+                ifLeft = {
+                    state.copy(
+                        status = ERROR,
+                        exception = it
+                    )
+                },
+                ifRight = {
+                    state.copy(
+                        status = LOADED,
+                        wrestler = it,
+                        exception = null
+                    )
+                }
+            )
         }
     }
 
     fun save() = viewModelScope.launch {
         _uiState.update { it.copy(status = SAVING) }
 
-        try {
-            val wrestler = _uiState
+        val result = catch {
+            _uiState
                 .value
                 .wrestler
                 ?.let { repository.saveWrestler(it) }
+        }
 
-            _uiState.update {
-                it.copy(
-                    status = SAVED,
-                    wrestler = wrestler,
-                    exception = null
-                )
-            }
-        } catch (e: Exception) {
-            _uiState.update {
-                it.copy(
-                    status = ERROR,
-                    exception = e
-                )
-            }
+        _uiState.update { state ->
+            result.fold(
+                ifLeft = {
+                    state.copy(
+                        status = ERROR,
+                        exception = it
+                    )
+                },
+                ifRight = {
+                    state.copy(
+                        status = SAVED,
+                        wrestler = it,
+                        exception = null
+                    )
+                }
+            )
         }
     }
 
