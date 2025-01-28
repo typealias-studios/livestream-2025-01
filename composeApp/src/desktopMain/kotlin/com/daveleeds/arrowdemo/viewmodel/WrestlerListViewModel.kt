@@ -18,7 +18,9 @@ data class WrestlerListUiState(
     val status: WrestlerListStatus = START
 )
 
-enum class WrestlerListStatus { START, LOADING, LOADED, ERROR }
+enum class WrestlerListStatus {
+    START, LOADING, LOADED, ERROR
+}
 
 class WrestlerListViewModel(
     private val repository: WrestlerRepository = WrestlerRepository()
@@ -36,9 +38,20 @@ class WrestlerListViewModel(
                     .map { id -> async { repository.fetchWrestler(id) } }
                     .awaitAll()
 
-                _uiState.update { it.copy(status = LOADED, wrestlers = wrestlers, exception = null) }
+                _uiState.update {
+                    it.copy(
+                        status = LOADED,
+                        wrestlers = wrestlers,
+                        exception = null
+                    )
+                }
             } catch (e: Exception) {
-                _uiState.update { it.copy(status = ERROR, exception = e) }
+                _uiState.update {
+                    it.copy(
+                        status = ERROR,
+                        exception = e
+                    )
+                }
             }
         }
     }

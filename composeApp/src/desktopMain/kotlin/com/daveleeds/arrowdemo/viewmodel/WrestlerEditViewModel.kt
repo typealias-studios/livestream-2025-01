@@ -16,7 +16,9 @@ data class WrestlerEditUiState(
     val status: WrestlerEditStatus = START
 )
 
-enum class WrestlerEditStatus { START, LOADING, LOADED, SAVING, SAVED, ERROR }
+enum class WrestlerEditStatus {
+    START, LOADING, LOADED, SAVING, SAVED, ERROR
+}
 
 class WrestlerEditViewModel(
     private val repository: WrestlerRepository = WrestlerRepository()
@@ -26,11 +28,23 @@ class WrestlerEditViewModel(
 
     fun load(id: Int) = viewModelScope.launch {
         _uiState.update { it.copy(status = LOADING) }
+
         try {
             val wrestler = repository.fetchWrestler(id)
-            _uiState.update { it.copy(status = LOADED, wrestler = wrestler, exception = null) }
+            _uiState.update {
+                it.copy(
+                    status = LOADED,
+                    wrestler = wrestler,
+                    exception = null
+                )
+            }
         } catch (e: Exception) {
-            _uiState.update { it.copy(status = ERROR, exception = e) }
+            _uiState.update {
+                it.copy(
+                    status = ERROR,
+                    exception = e
+                )
+            }
         }
     }
 
@@ -38,30 +52,67 @@ class WrestlerEditViewModel(
         _uiState.update { it.copy(status = SAVING) }
 
         try {
-            val wrestler = _uiState.value.wrestler?.let { repository.saveWrestler(it) }
-            _uiState.update { it.copy(status = SAVED, wrestler = wrestler, exception = null) }
+            val wrestler = _uiState
+                .value
+                .wrestler
+                ?.let { repository.saveWrestler(it) }
+
+            _uiState.update {
+                it.copy(
+                    status = SAVED,
+                    wrestler = wrestler,
+                    exception = null
+                )
+            }
         } catch (e: Exception) {
-            _uiState.update { it.copy(status = ERROR, exception = e) }
+            _uiState.update {
+                it.copy(
+                    status = ERROR,
+                    exception = e
+                )
+            }
         }
     }
 
     fun setName(name: String) = _uiState.update {
-        it.copy(wrestler = it.wrestler?.copy(name = name))
+        it.copy(
+            wrestler = it.wrestler?.copy(
+                name = name
+            )
+        )
     }
 
     fun setAge(age: Int) = _uiState.update {
-        it.copy(wrestler = it.wrestler?.copy(age = age))
+        it.copy(
+            wrestler = it.wrestler?.copy(
+                age = age
+            )
+        )
     }
 
     fun setWeight(weight: Int) = _uiState.update {
-        it.copy(wrestler = it.wrestler?.copy(weight = weight))
+        it.copy(
+            wrestler = it.wrestler?.copy(
+                weight = weight
+            )
+        )
     }
 
     fun setCity(city: String) = _uiState.update {
-        it.copy(wrestler = it.wrestler?.copy(hometown = it.wrestler.hometown.copy(city = city)))
+        it.copy(
+            wrestler = it.wrestler?.copy(
+                hometown = it.wrestler.hometown.copy(city = city)
+            )
+        )
     }
 
     fun setCountry(country: String) = _uiState.update {
-        it.copy(wrestler = it.wrestler?.copy(hometown = it.wrestler.hometown.copy(country = country)))
+        it.copy(
+            wrestler = it.wrestler?.copy(
+                hometown = it.wrestler.hometown.copy(
+                    country = country
+                )
+            )
+        )
     }
 }
