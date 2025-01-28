@@ -1,5 +1,7 @@
 package com.daveleeds.arrowdemo.data
 
+import arrow.resilience.Schedule
+import arrow.resilience.retry
 import com.daveleeds.arrowdemo.API_URL
 import com.daveleeds.arrowdemo.Wrestler
 import com.daveleeds.arrowdemo.WrestlerIds
@@ -11,27 +13,39 @@ import io.ktor.http.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class WrestlerRepository(
     private val baseUrl: String = API_URL,
     private val client: HttpClient = defaultClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
+    private val policy = Schedule
+        .exponential<Throwable>(250.milliseconds)
+        .doUntil { _, duration -> duration > 15.seconds }
+
     suspend fun fetchWrestlerIds(): List<Int> =
         withContext(dispatcher) {
-            client.get(baseUrl).body<WrestlerIds>().ids
+            policy.retry {
+                client.get(baseUrl).body<WrestlerIds>().ids
+            }
         }
 
     suspend fun fetchWrestler(id: Int): Wrestler =
         withContext(dispatcher) {
-            client.get("$baseUrl/$id").body()
+            policy.retry {
+                client.get("$baseUrl/$id").body()
+            }
         }
 
     suspend fun saveWrestler(wrestler: Wrestler): Wrestler =
         withContext(dispatcher) {
-            client.put("$baseUrl/${wrestler.id}") {
-                contentType(ContentType.Application.Json)
-                setBody(wrestler)
-            }.body()
+            policy.retry {
+                client.put("$baseUrl/${wrestler.id}") {
+                    contentType(ContentType.Application.Json)
+                    setBody(wrestler)
+                }.body()
+            }
         }
 }
